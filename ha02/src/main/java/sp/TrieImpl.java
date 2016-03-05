@@ -1,9 +1,12 @@
 package sp;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.Map;
 
-
-public class TrieImpl implements Trie {
+public class TrieImpl implements Trie, StreamSerializable {
     private final TrieNode rootNode;
 
     public TrieImpl() {
@@ -73,7 +76,17 @@ public class TrieImpl implements Trie {
         return curNode.getPrefixCount();
     }
 
-    private static class TrieNode {
+    @Override
+    public void serialize(OutputStream out) throws IOException {
+        rootNode.serialize(out);
+    }
+
+    @Override
+    public void deserialize(InputStream in) throws IOException {
+        rootNode.deserialize(in);
+    }
+
+    private static class TrieNode implements StreamSerializable {
         private boolean leaf;
         private int prefixCount;
         private final HashMap<Character, TrieNode> children;
@@ -111,6 +124,31 @@ public class TrieImpl implements Trie {
         public void removeChild(char c) {
             if (children.containsKey(c)) {
                 children.remove(c);
+            }
+        }
+
+        @Override
+        public void serialize(OutputStream out) throws IOException {
+            out.write(leaf ? 1 : 0);
+            out.write(prefixCount);
+            out.write(children.size());
+            for (Map.Entry<Character,TrieNode> entry : children.entrySet()) {
+                out.write(entry.getKey());
+                entry.getValue().serialize(out);
+            }
+        }
+
+        @Override
+        public void deserialize(InputStream in) throws IOException {
+            leaf = in.read() == 1;
+            prefixCount = in.read();
+            children.clear();
+            int childCount = in.read();
+            for (int i = 0; i < childCount; i++) {
+                char key = (char)in.read();
+                TrieNode node = new TrieNode();
+                node.deserialize(in);
+                children.put(key, node);
             }
         }
     }
