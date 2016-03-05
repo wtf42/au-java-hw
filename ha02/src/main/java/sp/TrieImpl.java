@@ -2,45 +2,9 @@ package sp;
 
 import java.util.HashMap;
 
+
 public class TrieImpl implements Trie {
-    private class TrieNode {
-        private boolean leaf;
-        private int count;
-        private HashMap<Character, TrieNode> children;
-
-        public TrieNode() {
-            leaf = false;
-            count = 0;
-            children = new HashMap<>();
-        }
-
-        public boolean isLeaf() {
-            return leaf;
-        }
-        public void setLeaf(boolean isLeaf) {
-            leaf = isLeaf;
-        }
-        public int getCount() {
-            return count;
-        }
-        public void incCount() {
-            count++;
-        }
-        public void decCount() {
-            count--;
-        }
-        public boolean hasChildren(char c) {
-            return children.containsKey(c);
-        }
-        public TrieNode go(char c) {
-            if (!children.containsKey(c)) {
-                children.put(c, new TrieNode());
-            }
-            return children.get(c);
-        }
-    }
-
-    private TrieNode rootNode;
+    private final TrieNode rootNode;
 
     public TrieImpl() {
         rootNode = new TrieNode();
@@ -53,11 +17,11 @@ public class TrieImpl implements Trie {
         }
         TrieNode curNode = rootNode;
         for (char c : element.toCharArray()) {
-            curNode = curNode.go(c);
-            curNode.incCount();
+            curNode = curNode.gotoChild(c);
+            curNode.incPrefixCount();
         }
         curNode.setLeaf(true);
-        rootNode.incCount();
+        rootNode.incPrefixCount();
         return true;
     }
 
@@ -65,10 +29,10 @@ public class TrieImpl implements Trie {
     public boolean contains(String element) {
         TrieNode curNode = rootNode;
         for (char c : element.toCharArray()) {
-            if (!curNode.hasChildren(c)) {
+            if (!curNode.hasChild(c)) {
                 return false;
             }
-            curNode = curNode.go(c);
+            curNode = curNode.gotoChild(c);
         }
         return curNode.isLeaf();
     }
@@ -80,29 +44,75 @@ public class TrieImpl implements Trie {
         }
         TrieNode curNode = rootNode;
         for (char c : element.toCharArray()) {
-            curNode = curNode.go(c);
-            curNode.decCount();
+            TrieNode nextNode = curNode.gotoChild(c);
+            nextNode.decPrefixCount();
+            if (nextNode.getPrefixCount() == 0) {
+                curNode.removeChild(c);
+            }
+            curNode = nextNode;
         }
         curNode.setLeaf(false);
-        rootNode.decCount();
+        rootNode.decPrefixCount();
         return true;
     }
 
     @Override
     public int size() {
-        return rootNode.getCount();
+        return rootNode.getPrefixCount();
     }
 
     @Override
     public int howManyStartsWithPrefix(String prefix) {
         TrieNode curNode = rootNode;
         for (char c : prefix.toCharArray()) {
-            if (!curNode.hasChildren(c)) {
+            if (!curNode.hasChild(c)) {
                 return 0;
             }
-            curNode = curNode.go(c);
+            curNode = curNode.gotoChild(c);
         }
-        return curNode.getCount();
+        return curNode.getPrefixCount();
+    }
+
+    private static class TrieNode {
+        private boolean leaf;
+        private int prefixCount;
+        private final HashMap<Character, TrieNode> children;
+
+        public TrieNode() {
+            leaf = false;
+            prefixCount = 0;
+            children = new HashMap<>();
+        }
+
+        public boolean isLeaf() {
+            return leaf;
+        }
+        public void setLeaf(boolean isLeaf) {
+            leaf = isLeaf;
+        }
+        public int getPrefixCount() {
+            return prefixCount;
+        }
+        public void incPrefixCount() {
+            prefixCount++;
+        }
+        public void decPrefixCount() {
+            prefixCount--;
+        }
+        public boolean hasChild(char c) {
+            return children.containsKey(c);
+        }
+        public TrieNode gotoChild(char c) {
+            if (!children.containsKey(c)) {
+                children.put(c, new TrieNode());
+            }
+            return children.get(c);
+        }
+        public void removeChild(char c) {
+            if (children.containsKey(c)) {
+                children.remove(c);
+            }
+        }
     }
 }
 
