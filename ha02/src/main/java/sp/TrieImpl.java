@@ -1,3 +1,5 @@
+package sp;
+
 import java.util.HashMap;
 
 public class TrieImpl implements Trie {
