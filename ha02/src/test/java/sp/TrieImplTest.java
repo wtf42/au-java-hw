@@ -18,13 +18,19 @@ public class TrieImplTest {
     @Test
     public void testAdd() throws Exception {
         Trie trie = new TrieImpl();
-        assertTrue(!trie.contains("he"));
+        assertFalse(trie.contains("he"));
         assertTrue(trie.add("he"));
         assertTrue(trie.contains("he"));
-        assertTrue(!trie.contains("his"));
+        assertFalse(trie.contains("h"));
+        assertFalse(trie.contains("her"));
+        assertEquals(1, trie.size());
+        assertFalse(trie.contains("his"));
         assertTrue(trie.add("his"));
         assertTrue(trie.contains("his"));
-        assertTrue(!trie.add("his"));
+        assertFalse(trie.contains("hi"));
+        assertFalse(trie.contains("his1"));
+        assertFalse(trie.add("his"));
+        assertEquals(2, trie.size());
     }
 
     @Test
@@ -33,38 +39,42 @@ public class TrieImplTest {
         for (String s : words) {
             assertTrue(trie.contains(s));
         }
-        assertTrue(!trie.contains("wtf"));
-        assertTrue(!trie.contains("her"));
+        assertFalse(trie.contains("wtf"));
+        assertFalse(trie.contains("her"));
     }
 
     @Test
     public void testRemove() throws Exception {
         Trie trie = genWordsTrie();
-        assertTrue(!trie.remove("wtf"));
+        int size = words.length;
+
+        assertFalse(trie.remove("wtf"));
         for (String s : words) {
+            assertEquals(size, trie.size());
             assertTrue(trie.remove(s));
+            size--;
         }
+        assertEquals(0, trie.size());
         for (String s : words) {
-            assertTrue(!trie.contains(s));
+            assertFalse(trie.contains(s));
         }
-        assertEquals(trie.size(), 0);
     }
 
     @Test
     public void testSize() throws Exception {
-        assertEquals(new TrieImpl().size(), 0);
-        assertEquals(genWordsTrie().size(), 4);
+        assertEquals(0, new TrieImpl().size());
+        assertEquals(4, genWordsTrie().size());
     }
 
     @Test
     public void testHowManyStartsWithPrefix() throws Exception {
         Trie trie = genWordsTrie();
-        assertEquals(trie.howManyStartsWithPrefix("h"), 3);
-        assertEquals(trie.howManyStartsWithPrefix("he"), 2);
-        assertEquals(trie.howManyStartsWithPrefix("her"), 1);
-        assertEquals(trie.howManyStartsWithPrefix(""), 4);
+        assertEquals(3, trie.howManyStartsWithPrefix("h"));
+        assertEquals(2, trie.howManyStartsWithPrefix("he"));
+        assertEquals(1, trie.howManyStartsWithPrefix("her"));
+        assertEquals(4, trie.howManyStartsWithPrefix(""));
         assertTrue(trie.remove("hers"));
-        assertEquals(trie.howManyStartsWithPrefix("h"), 2);
-        assertEquals(trie.howManyStartsWithPrefix("her"), 0);
+        assertEquals(2, trie.howManyStartsWithPrefix("h"));
+        assertEquals(0, trie.howManyStartsWithPrefix("her"));
     }
 }
