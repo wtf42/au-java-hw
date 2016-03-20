@@ -58,6 +58,33 @@ public class TrieTest {
         ((StreamSerializable) trie).serialize(outputStream);
     }
 
+    @Test
+    public void testManyPrefixesSerialization() throws IOException {
+        Trie trie = instance();
+
+        assertTrue(trie.add("abc"));
+        assertTrue(trie.add("cde"));
+        final int prefixesCount = (Byte.MAX_VALUE - Byte.MIN_VALUE + 1) + 42;
+        for (char c = 0; c < prefixesCount; ++c) {
+            assertTrue(trie.add("z" + String.valueOf(c)));
+        }
+        assertEquals(prefixesCount, trie.howManyStartsWithPrefix("z"));
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ((StreamSerializable) trie).serialize(outputStream);
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        Trie newTrie = instance();
+        ((StreamSerializable) newTrie).deserialize(inputStream);
+
+        assertTrue(newTrie.contains("abc"));
+        assertTrue(newTrie.contains("cde"));
+        for (char c = 0; c < prefixesCount; ++c) {
+            assertTrue(trie.contains("z" + String.valueOf(c)));
+        }
+        assertEquals(prefixesCount, trie.howManyStartsWithPrefix("z"));
+    }
+
     public static Trie instance() {
         try {
             return (Trie) Class.forName("sp.TrieImpl").newInstance();
