@@ -1,8 +1,6 @@
 package sp;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,15 +76,15 @@ public class TrieImpl implements Trie, StreamSerializable {
 
     @Override
     public void serialize(OutputStream out) throws IOException {
-        rootNode.serialize(out);
+        rootNode.serialize(new DataOutputStream(out));
     }
 
     @Override
     public void deserialize(InputStream in) throws IOException {
-        rootNode.deserialize(in);
+        rootNode.deserialize(new DataInputStream(in));
     }
 
-    private static class TrieNode implements StreamSerializable {
+    private static class TrieNode {
         private boolean leaf;
         private int prefixCount;
         private final HashMap<Character, TrieNode> children;
@@ -127,25 +125,23 @@ public class TrieImpl implements Trie, StreamSerializable {
             }
         }
 
-        @Override
-        public void serialize(OutputStream out) throws IOException {
-            out.write(leaf ? 1 : 0);
-            out.write(prefixCount);
-            out.write(children.size());
+        public void serialize(DataOutputStream out) throws IOException {
+            out.writeBoolean(leaf);
+            out.writeInt(prefixCount);
+            out.writeInt(children.size());
             for (Map.Entry<Character,TrieNode> entry : children.entrySet()) {
-                out.write(entry.getKey());
+                out.writeChar(entry.getKey());
                 entry.getValue().serialize(out);
             }
         }
 
-        @Override
-        public void deserialize(InputStream in) throws IOException {
-            leaf = in.read() == 1;
-            prefixCount = in.read();
+        public void deserialize(DataInputStream in) throws IOException {
+            leaf = in.readBoolean();
+            prefixCount = in.readInt();
             children.clear();
-            int childCount = in.read();
+            int childCount = in.readInt();
             for (int i = 0; i < childCount; i++) {
-                char key = (char)in.read();
+                char key = in.readChar();
                 TrieNode node = new TrieNode();
                 node.deserialize(in);
                 children.put(key, node);
