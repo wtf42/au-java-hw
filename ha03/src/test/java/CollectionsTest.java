@@ -3,6 +3,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
@@ -51,21 +53,27 @@ public class CollectionsTest {
 
     @Test
     public void testFoldl() throws Exception {
-        List<Integer> arr = Arrays.asList(1, 2, 3, 4, 5);
-        Function2<Base, Integer, Derived> add = (a, b) -> new Derived(a.getX() + b);
-        Derived zero = new Derived(0);
-        Derived sum = Collections.foldl(add, zero, arr);
-        assertEquals(15, (int)sum.getX());
-        assertEquals(zero, Collections.foldl(add, zero, new ArrayList<>()));
+        List<Integer> digits = Arrays.asList(1, 2, 3, 4, 5);
+        Function2<Integer, Integer, Integer> digitsToInt = (sum, elem) -> sum * 10 + elem;
+        assertEquals(12345, (int)Collections.foldl(digitsToInt, 0, digits));
+
+        List<Derived> arr = Stream.of(1, 2, 3, 4, 5)
+                .map(Derived::new)
+                .collect(Collectors.toList());
+        Function2<Integer, Base, Integer> add = (sum, elem) -> sum + elem.getX();
+        assertEquals(15, (int)Collections.foldl(add, 0, arr));
     }
 
     @Test
     public void testFoldr() throws Exception {
-        List<Integer> arr = Arrays.asList(1, 2, 3, 4, 5);
-        Function2<Integer, Base, Derived> add = (a, b) -> new Derived(a + b.getX());
-        Derived zero = new Derived(0);
-        Derived sum = Collections.foldr(add, new Derived(0), arr);
-        assertEquals(15, (int)sum.getX());
-        assertEquals(zero, Collections.foldr(add, zero, new ArrayList<>()));
+        List<Integer> digits = Arrays.asList(1, 2, 3, 4, 5);
+        Function2<Integer, Integer, Integer> digitsToReversedInt = (elem, sum) -> sum * 10 + elem;
+        assertEquals(54321, (int)Collections.foldr(digitsToReversedInt, 0, digits));
+
+        List<Derived> arr = Stream.of(1, 2, 3, 4, 5)
+                .map(Derived::new)
+                .collect(Collectors.toList());
+        Function2<Base, Integer, Integer> add = (elem, sum) -> sum + elem.getX();
+        assertEquals(15, (int)Collections.foldr(add, 0, arr));
     }
 }
