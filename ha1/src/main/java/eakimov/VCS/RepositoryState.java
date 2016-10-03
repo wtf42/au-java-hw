@@ -1,13 +1,11 @@
 package eakimov.VCS;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class RepositoryState implements Serializable {
-    private final HashMap<String, Branch> allBranches = new HashMap<>();
+    private final Map<String, Branch> allBranches = new HashMap<>();
+    private final Set<String> stageFiles = new HashSet<>();
     private Branch currentBranch;
     private Revision currentRevision;
 
@@ -15,12 +13,12 @@ public class RepositoryState implements Serializable {
         return currentRevision;
     }
 
-    public Branch getCurrentBranch() {
-        return currentBranch;
-    }
-
     public void setCurrentRevision(Revision currentRevision) {
         this.currentRevision = currentRevision;
+    }
+
+    public Branch getCurrentBranch() {
+        return currentBranch;
     }
 
     public void setCurrentBranch(Branch currentBranch) {
@@ -48,5 +46,25 @@ public class RepositoryState implements Serializable {
 
     public List<String> getAllBranchNames() {
         return new ArrayList<>(allBranches.keySet());
+    }
+
+    public void addStageFile(String filename) {
+        stageFiles.add(filename);
+    }
+
+    public void deleteStageFile(String filename) {
+        stageFiles.remove(filename);
+    }
+
+    public void clearStageFiles() {
+        stageFiles.clear();
+    }
+
+    public boolean isStageFile(String filename) {
+        return stageFiles.contains(filename);
+    }
+
+    public Set<String> getStageFiles() {
+        return stageFiles;
     }
 }

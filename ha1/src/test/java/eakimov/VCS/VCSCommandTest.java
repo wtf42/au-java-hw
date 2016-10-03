@@ -3,6 +3,8 @@ package eakimov.VCS;
 import eakimov.VCS.errors.RepositoryException;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.*;
 
 public class VCSCommandTest extends VCSCommandTestsBase {
@@ -22,11 +24,11 @@ public class VCSCommandTest extends VCSCommandTestsBase {
         final RepositoryState state = new RepositoryState();
         final Branch branch = new Branch("branch1", null);
         state.addBranch(branch);
-        final Revision revision = new Revision(branch, null, "revision1");
+        final Revision revision = new Revision(branch, null, "revision1", new HashMap<>());
         state.setCurrentBranch(branch);
         state.setCurrentRevision(revision);
 
-        VCSFileUtils.initVCSFiles(command.repositoryRootPath);
+        VCSFileUtils.initVCSFiles(command.repositoryWorkingDirectory);
         command.state = state;
         command.saveState();
         command.loadState();

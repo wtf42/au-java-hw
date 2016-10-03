@@ -1,17 +1,19 @@
 package eakimov.VCS.commands;
 
-
 import com.google.common.collect.Lists;
 import eakimov.VCS.*;
 import eakimov.VCS.errors.BranchManagementException;
 import eakimov.VCS.errors.RepositoryException;
+import eakimov.VCS.errors.StageException;
 import io.airlift.airline.Command;
 import io.airlift.airline.Option;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Command(name = "merge", description = "Merge two branches")
 public class Merge extends VCSCommand
@@ -43,25 +45,20 @@ public class Merge extends VCSCommand
             }
         }
 
+        if (!state.getStageFiles().isEmpty()) {
+            throw new StageException("staged, but uncommited changes exists");
+        }
+
         final Revision mergeRevision = mergeBranch.getHeadRevision();
         final Revision commonParent = findCommonParent(currentRevision, mergeRevision);
 
         // actual merge
 
-        final Path emptyPath = Paths.get(repositoryRootPath,
+        final Path stageDirectoryPath = Paths.get(repositoryWorkingDirectory,
                 VCSDefaults.STATE_DIRECTORY,
-                VCSDefaults.EMPTY_REVISION_DIRECTORY);
-
-        Path mergeFrom = emptyPath;
-        if (commonParent != null) {
-            mergeFrom = getRevisionPath(commonParent);
-        }
-        Path mergeTo = emptyPath;
-        if (mergeRevision != null) {
-            mergeTo = getRevisionPath(mergeRevision);
-        }
-        Path resultsTo = Paths.get(repositoryRootPath);
-        VCSMerge.merge(mergeFrom, mergeTo, resultsTo);
+                VCSDefaults.STAGE_DIRECTORY);
+        VCSFileUtils.copyAllFiles(getRevisionPath(currentRevision), stageDirectoryPath);
+        VCSMerge.merge(repositoryWorkingDirectory, commonParent, mergeRevision, stageDirectoryPath);
 
         // actual merge completed
 
@@ -69,10 +66,17 @@ public class Merge extends VCSCommand
         final String commitMessage = String.format("merged from %s (revision %d)",
                 fromBranch,
                 mergeRevisionId);
+        final Map<String, Revision> revisionFiles = new HashMap<>();
+        VCSFileUtils.getWorkDirFiles(stageDirectoryPath)
+                .forEach(f -> revisionFiles.put(f, null));
         final Revision commitRevision = new Revision(resultBranch,
                 currentRevision,
                 mergeRevision,
-                commitMessage);
+                commitMessage,
+                revisionFiles);
+
+        VCSFileUtils.copyAllFiles(stageDirectoryPath, getRevisionPath(commitRevision));
+        VCSFileUtils.cleanUpDirectory(stageDirectoryPath);
 
         resultBranch.setHeadRevision(commitRevision);
         state.setCurrentRevision(commitRevision);

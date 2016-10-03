@@ -6,8 +6,6 @@ import eakimov.VCS.errors.RepositoryException;
 import io.airlift.airline.Arguments;
 import io.airlift.airline.Command;
 
-import java.nio.file.Paths;
-
 @Command(name = "delete", description = "Delete branch")
 public class DeleteBranch extends VCSCommand
 {
@@ -24,10 +22,8 @@ public class DeleteBranch extends VCSCommand
         state.deleteBranch(branch);
 
         Revision revision = branch.getHeadRevision();
-        while (revision != null) {
-            if (revision.getBranch() == branch) {
-                VCSFileUtils.removeDirectory(getRevisionPath(revision));
-            }
+        while (revision != null && revision.getBranch() == branch) {
+            VCSFileUtils.removeDirectory(getRevisionPath(revision));
             revision = revision.getParent();
         }
     }

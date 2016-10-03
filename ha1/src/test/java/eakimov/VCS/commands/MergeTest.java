@@ -45,12 +45,18 @@ public class MergeTest extends VCSCommandTestsBase {
         branch1.run();
 
         FileUtils.writeLines(file1Path.toFile(), file1Contents1);
+        final AddFile addFile1 = new AddFile();
+        addFile1.files = Collections.singletonList(file1Name);
+        addFile1.run();
         final Commit commit1 = new Commit();
         commit1.message = Collections.singletonList(commit1Message);
         commit1.run();
 
         FileUtils.writeLines(file1Path.toFile(), file1Contents2);
         FileUtils.writeLines(file2Path.toFile(), file2Contents);
+        final AddFile addFile2 = new AddFile();
+        addFile2.files = Arrays.asList(file1Name, file2Name);
+        addFile2.run();
         final Commit commit2 = new Commit();
         commit2.message = Collections.singletonList(commit2Message);
         commit2.run();
@@ -64,6 +70,9 @@ public class MergeTest extends VCSCommandTestsBase {
         branch2.run();
 
         FileUtils.writeLines(file1Path.toFile(), file1Contents3);
+        final AddFile addFile3 = new AddFile();
+        addFile3.files = Collections.singletonList(file1Name);
+        addFile3.run();
         final Commit commit3 = new Commit();
         commit3.message = Collections.singletonList(commit3Message);
         commit3.run();
@@ -74,11 +83,17 @@ public class MergeTest extends VCSCommandTestsBase {
 
         final Merge merge = new Merge();
         merge.fromBranch = branch2Name;
-        merge.loadState();
-        merge.actualRun();
+        merge.run();
 
         assertEquals(3, merge.getState().getCurrentRevision().getId());
         assertEquals(branch1Name, merge.getState().getCurrentBranch().getName());
+
+        final Checkout checkout3 = new Checkout();
+        checkout3.branchName = branch1Name;
+        checkout3.run();
+
+        assertEquals(3, checkout3.getState().getCurrentRevision().getId());
+        assertEquals(branch1Name, checkout3.getState().getCurrentBranch().getName());
         assertEquals(fileMergedContents, FileUtils.readLines(file1Path.toFile(), Charset.defaultCharset()));
         assertEquals(file2Contents, FileUtils.readLines(file2Path.toFile(), Charset.defaultCharset()));
     }
@@ -102,6 +117,9 @@ public class MergeTest extends VCSCommandTestsBase {
         branch1.run();
 
         FileUtils.writeStringToFile(file1Path.toFile(), fileContents1, Charset.defaultCharset());
+        final AddFile addFile1 = new AddFile();
+        addFile1.files = Collections.singletonList(file1Name);
+        addFile1.run();
         final Commit commit1 = new Commit();
         commit1.message = Collections.singletonList(commit1Message);
         commit1.run();
@@ -111,6 +129,9 @@ public class MergeTest extends VCSCommandTestsBase {
         branch2.run();
 
         FileUtils.writeStringToFile(file1Path.toFile(), fileContents2, Charset.defaultCharset());
+        final AddFile addFile2 = new AddFile();
+        addFile2.files = Collections.singletonList(file1Name);
+        addFile2.run();
         final Commit commit2 = new Commit();
         commit2.message = Collections.singletonList(commit2Message);
         commit2.run();

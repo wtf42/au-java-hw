@@ -34,11 +34,21 @@ public class CheckoutTest extends VCSCommandTestsBase {
         branch1.run();
 
         FileUtils.writeStringToFile(filePath.toFile(), fileContents1, Charset.defaultCharset());
+
+        final AddFile addFile1 = new AddFile();
+        addFile1.files = Collections.singletonList(fileName);
+        addFile1.run();
+
         final Commit commit1 = new Commit();
         commit1.message = Collections.singletonList(commit1Message);
         commit1.run();
 
         FileUtils.writeStringToFile(filePath.toFile(), fileContents2, Charset.defaultCharset());
+
+        final AddFile addFile2 = new AddFile();
+        addFile2.files = Collections.singletonList(fileName);
+        addFile2.run();
+
         final Commit commit2 = new Commit();
         commit2.message = Collections.singletonList(commit2Message);
         commit2.run();
@@ -56,6 +66,10 @@ public class CheckoutTest extends VCSCommandTestsBase {
         branch2.run();
 
         FileUtils.writeStringToFile(filePath.toFile(), fileContents3, Charset.defaultCharset());
+
+        final AddFile addFile3 = new AddFile();
+        addFile3.files = Collections.singletonList(fileName);
+        addFile3.run();
 
         final Commit commit3 = new Commit();
         commit3.message = Collections.singletonList(commit3Message);

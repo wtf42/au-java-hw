@@ -14,7 +14,12 @@ public class Main {
                         Checkout.class,
                         Log.class,
                         Merge.class,
-                        Init.class);
+                        Init.class,
+                        AddFile.class,
+                        Status.class,
+                        ResetFile.class,
+                        RemoveFile.class,
+                        CleanFiles.class);
 
         builder.withGroup("branch")
                 .withDescription("Manage branches")

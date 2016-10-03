@@ -2,9 +2,9 @@ package eakimov.VCS.commands;
 
 import eakimov.VCS.VCSCommandTestsBase;
 import eakimov.VCS.errors.BranchManagementException;
-import eakimov.VCS.errors.RepositoryException;
 import org.junit.Test;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -16,7 +16,8 @@ public class BranchesCommitsTest extends VCSCommandTestsBase {
         final String branchName = "branch1";
         final String commitMessage = "commit1";
         final String clonedBranchName = "branch2";
-        newRepository();
+        final String fileName = "file1.txt";
+        final Path repositoryPath = newRepository();
 
         new Init().run();
 
@@ -25,6 +26,11 @@ public class BranchesCommitsTest extends VCSCommandTestsBase {
         newBranchCommand.run();
 
         assertEquals(branchName, newBranchCommand.getState().getCurrentBranch().getName());
+
+        assertTrue(repositoryPath.resolve(fileName).toFile().createNewFile());
+        final AddFile addFile = new AddFile();
+        addFile.files = Collections.singletonList(fileName);
+        addFile.run();
 
         final Commit commit = new Commit();
         commit.message = Collections.singletonList(commitMessage);

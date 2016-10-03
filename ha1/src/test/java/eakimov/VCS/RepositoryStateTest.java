@@ -7,6 +7,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -22,13 +23,13 @@ public class RepositoryStateTest {
 
         final Branch branch1 = new Branch("branch1", null);
         state.addBranch(branch1);
-        final Revision rev1 = new Revision(branch1, null, "rev1");
+        final Revision rev1 = new Revision(branch1, null, "rev1", new HashMap<>());
         branch1.setHeadRevision(rev1);
 
         final Branch branch2 = new Branch("branch2", null);
         state.addBranch(branch2);
-        final Revision rev2 = new Revision(branch2, null, "rev2");
-        final Revision rev3 = new Revision(branch2, rev2, "rev3");
+        final Revision rev2 = new Revision(branch2, null, "rev2", new HashMap<>());
+        final Revision rev3 = new Revision(branch2, rev2, "rev3", new HashMap<>());
         branch2.setHeadRevision(rev3);
 
         state.setCurrentBranch(branch1);
@@ -57,7 +58,7 @@ public class RepositoryStateTest {
 
         final Branch branch1 = new Branch(branchName, null);
         state.addBranch(branch1);
-        final Revision rev1 = new Revision(branch1, null, revisionCommitText);
+        final Revision rev1 = new Revision(branch1, null, revisionCommitText, new HashMap<>());
         branch1.setHeadRevision(rev1);
         state.setCurrentBranch(branch1);
         state.setCurrentRevision(rev1);

@@ -9,7 +9,7 @@ import java.nio.file.*;
 
 public class VCSCommand implements Runnable
 {
-    protected final String repositoryRootPath = System.getProperty("user.dir");
+    protected final String repositoryWorkingDirectory = System.getProperty("user.dir");
     protected RepositoryState state;
 
     @Override
@@ -39,20 +39,20 @@ public class VCSCommand implements Runnable
     }
 
     public void loadState() throws RepositoryException {
-        state = VCSFileUtils.loadState(Paths.get(repositoryRootPath,
+        state = VCSFileUtils.loadState(Paths.get(repositoryWorkingDirectory,
                 VCSDefaults.STATE_DIRECTORY,
                 VCSDefaults.STATE_FILENAME));
     }
 
     protected void saveState() throws RepositoryException {
-        VCSFileUtils.saveState(Paths.get(repositoryRootPath,
+        VCSFileUtils.saveState(Paths.get(repositoryWorkingDirectory,
                 VCSDefaults.STATE_DIRECTORY,
                 VCSDefaults.STATE_FILENAME), state);
     }
 
     protected void lockState() throws RepositoryException {
         try {
-            Files.createFile(Paths.get(repositoryRootPath,
+            Files.createFile(Paths.get(repositoryWorkingDirectory,
                     VCSDefaults.STATE_DIRECTORY,
                     VCSDefaults.LOCK_FILENAME));
         } catch (IOException e) {
@@ -63,7 +63,7 @@ public class VCSCommand implements Runnable
 
     protected void unlockState() {
         try {
-            Files.delete(Paths.get(repositoryRootPath,
+            Files.delete(Paths.get(repositoryWorkingDirectory,
                     VCSDefaults.STATE_DIRECTORY,
                     VCSDefaults.LOCK_FILENAME));
         } catch (IOException e) {
@@ -73,13 +73,20 @@ public class VCSCommand implements Runnable
     }
 
     protected Path getRevisionPath(Revision revision) {
-        String revisionDirectoryName = VCSDefaults.EMPTY_REVISION_DIRECTORY;
+        String revisionDirectory = VCSDefaults.EMPTY_REVISION_DIRECTORY;
         if (revision != null) {
-            revisionDirectoryName = revision.getDirectory();
+            revisionDirectory = revision.getRevisionDirectory();
         }
-        return Paths.get(repositoryRootPath,
+        return Paths.get(repositoryWorkingDirectory,
                 VCSDefaults.STATE_DIRECTORY,
-                revisionDirectoryName);
+                revisionDirectory);
+    }
+
+    protected Path getStageFilePath(String fileName) {
+        return Paths.get(repositoryWorkingDirectory,
+                VCSDefaults.STATE_DIRECTORY,
+                VCSDefaults.STAGE_DIRECTORY,
+                fileName);
     }
 
     protected void actualRun() throws RepositoryException {}

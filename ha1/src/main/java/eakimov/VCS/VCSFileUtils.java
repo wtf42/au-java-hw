@@ -1,13 +1,16 @@
 package eakimov.VCS;
 
-import eakimov.VCS.errors.FilesException;
 import eakimov.VCS.errors.RepositoryException;
+import eakimov.VCS.errors.UnexpectedIOException;
 import eakimov.VCS.errors.UnrecoverableRepositoryException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class VCSFileUtils {
     public static RepositoryState loadState(Path path) throws RepositoryException {
@@ -59,8 +62,8 @@ public class VCSFileUtils {
         }
     }
 
-    public static void copyRevisionFiles(Path srcDirectory,
-                                         Path destDirectory) throws RepositoryException {
+    public static void copyAllFiles(Path srcDirectory,
+                                    Path destDirectory) throws RepositoryException {
         try {
             if (Files.notExists(destDirectory)) {
                 Files.createDirectory(destDirectory);
@@ -77,25 +80,55 @@ public class VCSFileUtils {
         try {
             FileUtils.deleteDirectory(directory.toFile());
         } catch (IOException e) {
-            throw new FilesException(directory.toString(), "delete", e.getMessage());
+            throw new UnexpectedIOException(e);
         }
     }
 
     public static void cleanUpDirectory(Path directory) throws RepositoryException {
-        final File[] files = directory.toFile().listFiles(stateDirectoryFilter);
+        final File[] files = directory.toFile().listFiles((FileFilter) stateDirectoryFilter);
         if (files == null) {
-            throw new FilesException(directory.toString(), "cleanup", "invalid directory to cleanup");
+            throw new RepositoryException("failed to cleanup: invalid directory");
         }
         try {
             for (File file : files) {
                 FileUtils.forceDelete(file);
             }
         } catch (IOException e) {
-            throw new FilesException(directory.toString(), "cleanup", e.getMessage());
+            throw new UnexpectedIOException(e);
         }
     }
 
-    private static final FileFilter stateDirectoryFilter =
+    public static List<String> getWorkDirFiles(Path directory) {
+        return FileUtils.listFiles(directory.toFile(),
+                TrueFileFilter.INSTANCE,
+                stateDirectoryFilter)
+                .stream().map(f -> directory.relativize(f.toPath()).toString())
+                .collect(Collectors.toList());
+    }
+
+    public static boolean isExistingFilesEqual(Path path1, Path path2) throws IOException {
+        String contents1 = FileUtils.readFileToString(path1.toFile(), Charset.defaultCharset());
+        String contents2 = FileUtils.readFileToString(path2.toFile(), Charset.defaultCharset());
+        return contents1.equals(contents2);
+    }
+
+    public static Path getRevisionFilePath(String workingDirectory,
+                                           Revision revision,
+                                           String file) {
+        String revisionDirectory = VCSDefaults.EMPTY_REVISION_DIRECTORY;
+        if (revision != null) {
+            Revision fileRevision = revision.getFileRevision(file);
+            if (fileRevision != null) {
+                revisionDirectory = fileRevision.getRevisionDirectory();
+            }
+        }
+        return Paths.get(workingDirectory,
+                VCSDefaults.STATE_DIRECTORY,
+                revisionDirectory,
+                file);
+    }
+
+    private static final IOFileFilter stateDirectoryFilter =
             new NotFileFilter(new AndFileFilter(
                     DirectoryFileFilter.INSTANCE,
                     new NameFileFilter(VCSDefaults.STATE_DIRECTORY)));

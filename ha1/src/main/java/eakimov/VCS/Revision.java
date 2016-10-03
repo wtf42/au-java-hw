@@ -1,50 +1,72 @@
 package eakimov.VCS;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Revision implements Serializable {
-    private final Branch branch;
+    private final String commitMessage;
+    private final Map<String, Revision> files;
+
     private final int id;
+    private final Branch branch;
     private final Revision parent;
     private final Revision mergeParent;
-    private final String commitMessage;
 
     // new revision with parent
-    public Revision(Branch branch, Revision revision, String commitMessage) {
-        this.branch = branch;
+    public Revision(Branch branch,
+                    Revision revision,
+                    String commitMessage,
+                    Map<String, Revision> files) {
+        this.commitMessage = commitMessage;
+        this.files = fixNewFiles(files);
         this.id = branch.nextRevisionId();
+        this.branch = branch;
         this.parent = revision;
         this.mergeParent = null;
-        this.commitMessage = commitMessage;
-    }
-
-    // copy revision to new branch
-    public Revision(Branch branch, Revision other) {
-        this.branch = branch;
-        this.id = branch.nextRevisionId();
-        this.parent = other.getParent();
-        this.mergeParent = other.getMergeParent();
-        this.commitMessage = other.getCommitMessage();
     }
 
     // merge
     public Revision(Branch branch,
                     Revision parent,
                     Revision mergeParent,
-                    String commitMessage) {
-        this.branch = branch;
+                    String commitMessage,
+                    Map<String, Revision> files) {
+        this.commitMessage = commitMessage;
+        this.files = fixNewFiles(files);
         this.id = branch.nextRevisionId();
+        this.branch = branch;
         this.parent = parent;
         this.mergeParent = mergeParent;
-        this.commitMessage = commitMessage;
     }
 
-    public Branch getBranch() {
-        return branch;
+    public String getCommitMessage() {
+        return commitMessage;
+    }
+
+    public Collection<String> getFiles() {
+        return files.keySet();
+    }
+
+    public Revision getFileRevision(String file) {
+        return files.get(file);
+    }
+
+    public Map<String, Revision> getAllFileRevisions() {
+        return files;
+    }
+
+    public String getRevisionDirectory() {
+        return branch.getDirectoryPrefix() + Integer.toString(id);
     }
 
     public int getId() {
         return id;
+    }
+
+    public Branch getBranch() {
+        return branch;
     }
 
     public Revision getParent() {
@@ -55,11 +77,9 @@ public class Revision implements Serializable {
         return mergeParent;
     }
 
-    public String getCommitMessage() {
-        return commitMessage;
-    }
-
-    public String getDirectory() {
-        return branch.getDirectoryPrefix() + Integer.toString(id);
+    private Map<String, Revision> fixNewFiles(Map<String, Revision> files) {
+        return files.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue() != null ? entry.getValue() : this));
     }
 }
