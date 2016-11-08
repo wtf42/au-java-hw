@@ -26,7 +26,7 @@ public class Client {
 
     private ServerSocket p2pSocket;
     private int p2pPort;
-    private boolean p2pStopped;
+    private volatile boolean p2pStopped;
 
     public Client(Storage storage, String trackerHost, int trackerPort, PrintStream logger) {
         this.storage = storage;

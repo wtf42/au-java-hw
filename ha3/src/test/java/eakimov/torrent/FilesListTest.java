@@ -22,7 +22,7 @@ public class FilesListTest {
     @Rule
     public TemporaryFolder workDir = new TemporaryFolder();
 
-    @Test(timeout=3000)
+    @Test(timeout = 10000)
     public void uploadTwoFiles() throws Exception {
         final String file1Contents = "file contents";
         final String file2Contents = "file2 contents";
@@ -63,7 +63,7 @@ public class FilesListTest {
         }
     }
 
-    @Test(timeout=3000)
+    @Test(timeout = 10000)
     public void uploadEqualFileNames() throws Exception {
         final String fileName = "file.txt";
         final String file1Contents = "file contents";

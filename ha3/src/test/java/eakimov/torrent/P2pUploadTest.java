@@ -13,7 +13,7 @@ import java.io.*;
 import static org.junit.Assert.*;
 
 public class P2pUploadTest extends TorrentTrackerTestBase {
-    @Test(timeout = 2000)
+    @Test(timeout = 10000)
     public void uploadStartedAfterDownload() throws Exception {
         try (Tracker tracker = new Tracker(new TrackerFilesInformation())) {
             final Client uploadClient = new Client(new Storage());

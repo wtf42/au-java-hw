@@ -10,7 +10,7 @@ import java.net.SocketException;
 public class Tracker implements AutoCloseable {
     private final TrackerFilesInformation trackerFilesInformation;
     private final ServerSocket serverSocket;
-    private boolean stopped = true;
+    private volatile boolean stopped = true;
 
     public Tracker(TrackerFilesInformation trackerFilesInformation, int port) throws IOException {
         this.trackerFilesInformation = trackerFilesInformation;
@@ -24,12 +24,10 @@ public class Tracker implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException, InterruptedException {
+    public synchronized void close() throws IOException, InterruptedException {
         stopped = true;
         serverSocket.close();
-        synchronized (this) {
-            wait();
-        }
+        wait();
     }
 
     private void listener() {

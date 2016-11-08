@@ -25,7 +25,7 @@ public class P2pDownloadTest {
     @Rule
     public TemporaryFolder workDir = new TemporaryFolder();
 
-    @Test(timeout = 2000)
+    @Test(timeout = 10000)
     public void fileDownload() throws Exception {
         try (Tracker tracker = new Tracker(new TrackerFilesInformation())) {
             final Client client1 = new Client(new Storage());
@@ -50,7 +50,7 @@ public class P2pDownloadTest {
         }
     }
 
-    @Test(timeout = 2000)
+    @Test(timeout = 10000)
     public void checkSeeders() throws Exception {
         try (Tracker tracker = new Tracker(new TrackerFilesInformation())) {
             final Client client = new Client(new Storage());
@@ -82,7 +82,7 @@ public class P2pDownloadTest {
         }
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void checkManySeedersWithSinglePart() throws Exception {
         final int clientsCount = 5;
         final int downloadFileId = 0;
@@ -125,7 +125,7 @@ public class P2pDownloadTest {
         }
     }
 
-    @Test(timeout = 2000)
+    @Test(timeout = 10000)
     public void emptyFile() throws Exception {
         try (Tracker tracker = new Tracker(new TrackerFilesInformation())) {
             final Client client1 = new Client(new Storage());
@@ -149,7 +149,7 @@ public class P2pDownloadTest {
         }
     }
 
-    @Test(timeout = 5000, expected = InvalidClientException.class)
+    @Test(timeout = 10000, expected = InvalidClientException.class)
     public void invalidClient() throws Exception {
         try (Tracker tracker = new Tracker(new TrackerFilesInformation())) {
             final PrintStream logger = spy(new PrintStream(new ByteArrayOutputStream()));

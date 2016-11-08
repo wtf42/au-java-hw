@@ -20,7 +20,7 @@ public class TrackerSourcesTest {
     @Rule
     public TemporaryFolder workDir = new TemporaryFolder();
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void checkSources() throws Exception {
         final int clientsCount = 5;
         final int clientPortsStart = 8000;

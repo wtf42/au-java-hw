@@ -20,7 +20,7 @@ public class StorageTest {
     @Rule
     public TemporaryFolder workDir = new TemporaryFolder();
 
-    @Test(timeout=3000)
+    @Test(timeout = 10000)
     public void saveLoadTracker() throws Exception {
         final File file1 = workDir.newFile();
         final File file2 = workDir.newFile();
@@ -54,7 +54,7 @@ public class StorageTest {
         }
     }
 
-    @Test(timeout=3000)
+    @Test(timeout = 10000)
     public void saveLoadClient() throws Exception {
         try (Tracker tracker = new Tracker(new TrackerFilesInformation())) {
             final Storage clientStorage1 = new Storage();

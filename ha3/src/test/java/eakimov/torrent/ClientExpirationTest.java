@@ -14,7 +14,7 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 public class ClientExpirationTest extends TorrentTrackerTestBase {
-    @Test(timeout = 3000)
+    @Test(timeout = 10000)
     public void expiredClient() throws Exception {
         try (Tracker tracker = new Tracker(new TrackerFilesInformation())) {
             final Client client = new Client(new Storage());
@@ -42,7 +42,7 @@ public class ClientExpirationTest extends TorrentTrackerTestBase {
             }
         }
     }
-    @Test(timeout = 3000)
+    @Test(timeout = 10000)
     public void autoUpdates() throws Exception {
         try (Tracker tracker = new Tracker(new TrackerFilesInformation())) {
             final Client client = new Client(new Storage());
