@@ -11,27 +11,27 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileStatus implements Serializable {
-    private final File localPath;
+    private final String localPath;
     private final Set<Integer> availableParts;
     private FileInformation trackerInfo;
     private boolean ready;
 
     public FileStatus(File localPath, int fileId) {
-        this.localPath = localPath;
+        this.localPath = localPath.getAbsolutePath();
         availableParts = fillAvailableSize(localPath.length());
         trackerInfo = new FileInformation(fileId, localPath.getName(), localPath.length());
         ready = true;
     }
 
     public FileStatus(File localPath, FileInformation trackerInfo) {
-        this.localPath = localPath;
+        this.localPath = localPath.getAbsolutePath();
         availableParts = new HashSet<>();
         this.trackerInfo = trackerInfo;
         ready = trackerInfo.getSize() == 0;
     }
 
     public File getLocalPath() {
-        return localPath;
+        return new File(localPath);
     }
 
     public synchronized Set<Integer> getAvailableParts() {
