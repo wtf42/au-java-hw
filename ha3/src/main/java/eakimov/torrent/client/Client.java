@@ -3,11 +3,12 @@ package eakimov.torrent.client;
 import eakimov.torrent.common.ClientInformation;
 import eakimov.torrent.common.TorrentTracker;
 import eakimov.torrent.common.FileInformation;
+import rx.*;
+import rx.Observable;
+import rx.Observable.OnSubscribe;
+import rx.observers.Subscribers;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -118,58 +119,69 @@ public class Client {
         }
     }
 
-    public void uploadFile(File inputFile) throws ClientException, IOException {
+    public FileStatus uploadFile(File inputFile) throws ClientException, IOException {
         try (TrackerConnection connection = connectToTracker()) {
             final int fileId = connection.uploadFile(inputFile);
-            storage.addExistingFile(inputFile, fileId);
+            return storage.addExistingFile(inputFile, fileId);
         }
     }
 
-    public void downloadFile(FileInformation info, File outputFile) throws ClientException, IOException {
-        final FileStatus fileStatus = storage.addDownloadFile(outputFile, info);
+    public void downloadFile(FileInformation info, File outputFile) {
+        downloadFileObservable(info, outputFile).subscribe(Subscribers.empty());
+    }
 
-        try (TrackerConnection trackerConnection = connectToTracker();
-             FileChannel outputFileChannel = new FileOutputStream(outputFile).getChannel()) {
-            outputFileChannel.truncate(info.getSize());
+    public Observable<FileStatus> downloadFileObservable(FileInformation info, File outputFile) {
+        return Observable.create(subscriber -> {
+            final FileStatus fileStatus = storage.addDownloadFile(outputFile, info);
+            subscriber.onNext(fileStatus);
 
-            while (!fileStatus.isReady()) {
-                // to download file we
-                // 1) download peers from tracker
-                // 2) for each peer:
-                // 2.1) download information about available file parts
-                // 2.2) download interested file parts from peer
-                // continue to (1) until all parts are downloaded
+            try (TrackerConnection trackerConnection = connectToTracker();
+                 FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+                 FileChannel outputFileChannel = fileOutputStream.getChannel()) {
+                outputFileChannel.truncate(info.getSize());
 
-                final Set<Integer> remainingParts = fileStatus.getRemainingParts();
-                final List<ClientInformation> sources = trackerConnection.getSources(info);
-                for (ClientInformation source : sources) {
-                    try (ClientConnection connection = new ClientConnection(source)) {
-                        final List<Integer> clientParts = connection.stat(info.getId());
-                        for (int part : clientParts) {
-                            if (remainingParts.contains(part)) {
-                                final long partSize = fileStatus.getPartSize(part);
-                                connection.get(info.getId(), part, partSize, outputFileChannel);
-                                fileStatus.setPartAvailable(part);
-                                remainingParts.remove(part);
+                while (!fileStatus.isReady()) {
+                    // to download file we
+                    // 1) download peers from tracker
+                    // 2) for each peer:
+                    // 2.1) download information about available file parts
+                    // 2.2) download interested file parts from peer
+                    // continue to (1) until all parts are downloaded
+
+                    final Set<Integer> remainingParts = fileStatus.getRemainingParts();
+                    final List<ClientInformation> sources = trackerConnection.getSources(info);
+                    for (ClientInformation source : sources) {
+                        try (ClientConnection connection = new ClientConnection(source)) {
+                            final List<Integer> clientParts = connection.stat(info.getId());
+                            for (int part : clientParts) {
+                                if (remainingParts.contains(part)) {
+                                    final long partSize = fileStatus.getPartSize(part);
+                                    connection.get(info.getId(), part, partSize, outputFileChannel);
+                                    fileStatus.setPartAvailable(part);
+                                    remainingParts.remove(part);
+                                    subscriber.onNext(fileStatus);
+                                }
                             }
+                        } catch (IOException e) {
+                            logger.println("client communication error: " + e.getMessage());
                         }
-                    } catch (IOException e) {
-                        logger.println("client communication error: " + e.getMessage());
+                        if (fileStatus.isReady()) {
+                            break;
+                        }
                     }
-                    if (fileStatus.isReady()) {
-                        break;
-                    }
-                }
-                if (!fileStatus.isReady()) {
-                    try {
-                        // file is not completely available at the moment
-                        // wait here for new seeders before next query to tracker
-                        Thread.sleep(TorrentTracker.NEW_CLIENTS_WAITING_TIME);
-                    } catch (InterruptedException ignored) {
+                    if (!fileStatus.isReady()) {
+                        try {
+                            // file is not completely available at the moment
+                            // wait here for new seeders before next query to tracker
+                            Thread.sleep(TorrentTracker.NEW_CLIENTS_WAITING_TIME);
+                        } catch (InterruptedException ignored) {
+                        }
                     }
                 }
+            } catch (IOException e) {
+                subscriber.onError(e);
             }
-        }
+        });
     }
 
     public boolean update() throws ClientException, IOException {

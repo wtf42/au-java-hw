@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.spbau.mit.eakimov</groupId>
-    <artifactId>hw5</artifactId>
+    <artifactId>hw6</artifactId>
     <version>0.1</version>
 
     <dependencies>
@@ -42,6 +42,11 @@
             <version>1.6.6</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.reactivex</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>1.2.3</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -60,13 +65,13 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>eakimov.torrent.CommandLineTracker</mainClass>
+                            <mainClass>eakimov.torrent.GuiClient</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                    <finalName>hw5</finalName>
+                    <finalName>hw6</finalName>
                 </configuration>
                 <executions>
                     <execution>

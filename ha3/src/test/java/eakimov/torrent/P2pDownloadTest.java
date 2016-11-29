@@ -11,6 +11,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import rx.observers.Subscribers;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -149,7 +150,7 @@ public class P2pDownloadTest {
         }
     }
 
-    @Test(timeout = 10000, expected = InvalidClientException.class)
+    @Test(timeout = 10000)
     public void invalidClient() throws Exception {
         try (Tracker tracker = new Tracker(new TrackerFilesInformation())) {
             final PrintStream logger = spy(new PrintStream(new ByteArrayOutputStream()));
@@ -172,7 +173,15 @@ public class P2pDownloadTest {
             // client1 is not available now
 
             final FileInformation fileInformation = client2.listFiles().get(0);
-            client2.downloadFile(fileInformation, file2);
+
+            boolean[] fail = new boolean[] { false };
+            client2.downloadFileObservable(fileInformation, file2)
+                    .subscribe(Subscribers.create(p -> {}, e -> {
+                        if (e instanceof InvalidClientException) {
+                            fail[0] = true;
+                        }
+                    }));
+            assertTrue(fail[0]);
         }
     }
 
