@@ -72,6 +72,14 @@ public class FileStatus implements Serializable {
                 .collect(Collectors.toSet());
     }
 
+    @Override
+    public String toString() {
+        final String progress = ready
+                ? " (ready)"
+                : String.format(" (%d %%)", availableParts.size() * 100 / getPartsCount());
+        return trackerInfo.toString() + progress + " at [" + localPath + "]";
+    }
+
     private static Set<Integer> fillAvailableSize(long fileLength) {
         final int partsCount = countPartsFromSize(fileLength);
         return Stream.iterate(0, i -> i + 1).limit(partsCount).collect(Collectors.toSet());
