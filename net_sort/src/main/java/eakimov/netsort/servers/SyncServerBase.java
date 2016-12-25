@@ -5,6 +5,7 @@ import eakimov.netsort.settings.ServerSettings;
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.nio.channels.ClosedSelectorException;
 
 public abstract class SyncServerBase extends ServerBase {
     protected volatile boolean stopped;
@@ -23,7 +24,7 @@ public abstract class SyncServerBase extends ServerBase {
         while (!stopped) {
             try {
                 actualRun();
-            } catch (SocketException e) {
+            } catch (SocketException | ClosedSelectorException e) {
                 if (!stopped) {
                     e.printStackTrace();
                 }

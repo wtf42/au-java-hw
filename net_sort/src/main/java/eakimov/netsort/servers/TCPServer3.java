@@ -33,6 +33,7 @@ public class TCPServer3 extends SyncServerBase {
     public void stop() throws InterruptedException {
         super.stop();
         try {
+            selector.close();
             socketChannel.close();
             executorService.shutdown();
         } catch (IOException ignored) {

@@ -1,5 +1,7 @@
 package eakimov.netsort.settings;
 
+import java.util.Scanner;
+
 public class RunSettings {
     private final int archId;
     private final int x;
@@ -154,5 +156,25 @@ public class RunSettings {
         value += "\nd: " + (dSelected ? String.format("from %d to %d step %d", dStart, dEnd, dStep) : dStart);
         value += "\n";
         return value;
+    }
+
+    public static RunSettings parse(String s) {
+        Scanner v = new Scanner(s);
+        return new RunSettings(
+                v.nextInt(),
+                v.nextInt() == 1,
+                v.nextInt() == 1,
+                v.nextInt() == 1,
+                v.nextInt(),
+                v.nextInt(),
+                v.nextInt(),
+                v.nextInt(),
+                v.nextInt(),
+                v.nextInt(),
+                v.nextInt(),
+                v.nextInt(),
+                v.nextInt(),
+                v.nextInt()
+        );
     }
 }

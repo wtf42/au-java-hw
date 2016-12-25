@@ -63,7 +63,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>eakimov.nethw.qqq</mainClass>
+                            <mainClass>eakimov.netsort.gui.NetSortGui</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

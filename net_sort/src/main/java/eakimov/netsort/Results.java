@@ -33,10 +33,9 @@ public class Results implements Serializable {
     }
 
     public void exportToCSV(File file) throws IOException {
-        //столбцы - параметры запуска + метрики-результаты
-        //строки - [заголовок] + собственно значения
         try (PrintWriter printWriter = new PrintWriter(file)) {
-            printWriter.println("a,x,n,m,d,t1,t2,t3");
+            //printWriter.println("a,x,n,m,d,t1,t2,t3");
+            printWriter.println("arch,requests,size,clients,delay,sort time,query time,client time");
             for (Result result : results) {
                 printWriter.format("%d,%d,%d,%d,%d,%f,%f,%f",
                         result.getArguments().getArch(),
