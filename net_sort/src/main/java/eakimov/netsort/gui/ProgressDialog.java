@@ -62,8 +62,15 @@ public class ProgressDialog extends JDialog implements ProgressHandler {
         });
     }
 
+    public void setError(String message) {
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(this, "error: " + message);
+            dispose();
+        });
+    }
+
     private void onCancel() {
-        // TODO:???
-        dispose();
+        JOptionPane.showMessageDialog(this, "not implemented yet :(");
+        System.exit(0);
     }
 }

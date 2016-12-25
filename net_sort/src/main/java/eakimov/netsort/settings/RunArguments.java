@@ -36,4 +36,13 @@ public class RunArguments implements Serializable {
     public int getDelta() {
         return delta;
     }
+
+    public int calculatePacketSize() {
+        return 42 + n * 5;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("a: %d, x: %d, n: %d, m: %d, d: %d", arch, x, n, m, delta);
+    }
 }

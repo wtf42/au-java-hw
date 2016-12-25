@@ -1,0 +1,8 @@
+package eakimov;
+
+option java_package = "eakimov.netsort.protocol";
+option java_outer_classname = "SortArrayProtocol";
+
+message ArrayMessage {
+    repeated sfixed32 values = 1;
+}

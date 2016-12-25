@@ -119,4 +119,40 @@ public class RunSettings {
         }
         return 0;
     }
+
+    public int getSelectedValue(RunArguments arguments) {
+        if (nSelected) {
+            return arguments.getN();
+        }
+        if (mSelected) {
+            return arguments.getM();
+        }
+        if (dSelected) {
+            return arguments.getDelta();
+        }
+        return 0;
+    }
+
+    public String getSelectedName() {
+        if (nSelected) {
+            return "N";
+        }
+        if (mSelected) {
+            return "M";
+        }
+        if (dSelected) {
+            return "D";
+        }
+        return "???";
+    }
+
+    @Override
+    public String toString() {
+        String value = String.format("arch: %d\nx: %d", archId, x);
+        value += "\nn: " + (nSelected ? String.format("from %d to %d step %d", nStart, nEnd, nStep) : nStart);
+        value += "\nm: " + (mSelected ? String.format("from %d to %d step %d", mStart, mEnd, mStep) : mStart);
+        value += "\nd: " + (dSelected ? String.format("from %d to %d step %d", dStart, dEnd, dStep) : dStart);
+        value += "\n";
+        return value;
+    }
 }

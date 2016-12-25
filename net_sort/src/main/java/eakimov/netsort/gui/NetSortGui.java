@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.*;
+import java.io.IOException;
+import java.nio.file.Paths;
 
 public class NetSortGui extends JDialog {
     private JPanel contentPane;
@@ -68,15 +70,15 @@ public class NetSortGui extends JDialog {
         dRadioButton.addChangeListener(selChangeListenerInstance);
 
         xSpinner.setModel(new SpinnerNumberModel(1, 1, 100, 1));
-        nStartSpinner.setModel(new SpinnerNumberModel(1000000, 1, 1000000000, 1));
-        nEndSpinner.setModel(new SpinnerNumberModel(100000000, 1, 1000000000, 1));
-        nStepSpinner.setModel(new SpinnerNumberModel(1000000, 1, 1000000000, 1));
-        mStartSpinner.setModel(new SpinnerNumberModel(10, 1, 1000, 1));
+        nStartSpinner.setModel(new SpinnerNumberModel(1000, 1, 1000_000_000, 1));
+        nEndSpinner.setModel(new SpinnerNumberModel(100000, 1, 1000_000_000, 1));
+        nStepSpinner.setModel(new SpinnerNumberModel(1000, 1, 1000_000_000, 1));
+        mStartSpinner.setModel(new SpinnerNumberModel(2, 1, 1000, 1));
         mEndSpinner.setModel(new SpinnerNumberModel(100, 1, 1000, 1));
         mStepSpinner.setModel(new SpinnerNumberModel(1, 1, 100, 1));
-        dStartSpinner.setModel(new SpinnerNumberModel(0, 0, 1000000000, 1));
-        dEndSpinner.setModel(new SpinnerNumberModel(100, 1, 1000000000, 1));
-        dStepSpinner.setModel(new SpinnerNumberModel(10, 1, 1000000000, 1));
+        dStartSpinner.setModel(new SpinnerNumberModel(0, 0, 1000_000_000, 1));
+        dEndSpinner.setModel(new SpinnerNumberModel(100, 1, 1000_000_000, 1));
+        dStepSpinner.setModel(new SpinnerNumberModel(10, 1, 1000_000_000, 1));
     }
 
     private class SelChangeListener implements ChangeListener {
@@ -126,12 +128,19 @@ public class NetSortGui extends JDialog {
         }
 
         JOptionPane.showMessageDialog(this,
-                "completed!\nplease select file to save results!");
+                "completed!\nplease select directory to save results");
 
         Results results = netSortRunner.getResults();
         JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(Paths.get(".").toFile());
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            results.exportToCSV(chooser.getSelectedFile());
+            try {
+                results.export(chooser.getSelectedFile());
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this,
+                        "failed to save: " + e.getMessage());
+            }
         }
     }
 
